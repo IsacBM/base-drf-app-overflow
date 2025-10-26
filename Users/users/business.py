@@ -24,7 +24,7 @@ class UserBusiness(ModelInstanceBusiness):
         """Retorna apenas os perfis ativos do usuário"""
         return self.object_instance.profiles.filter(status=1)
 
-    # --- ADICIONE ESTE NOVO MÉTODO ---
+    # Mudar a senha
     def change_password(self, old_password, new_password):
         """
         Orquestra a mudança de senha do usuário (self.object_instance).
@@ -41,3 +41,4 @@ class UserBusiness(ModelInstanceBusiness):
             
         except self.exceptions_handled as e:
             raise e
+        

@@ -1,9 +1,7 @@
-# Em: Users/users/serializers.py
-
 from rest_framework import serializers
 import re
 
-# Importa a validação de senha que já existe no seu projeto de criação de conta
+# Importa a validação de senha que já existe no serializer de criação de conta
 from Users.account.serializers import PasswordConfirmCreateAccountSerializer
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -12,8 +10,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password_confirm = serializers.CharField(write_only=True)
 
     def validate_new_password(self, value):
-        # Reutilizando a lógica de validação de senha forte
-        # que já existe no seu serializer de criação de conta
+        # Reutilizando a lógica de validação de senha forte do serializer de criação de conta
         validator = PasswordConfirmCreateAccountSerializer()
         try:
             validator.validate_password(value)
@@ -28,3 +25,4 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError("As novas senhas não conferem.")
 
         return data
+    

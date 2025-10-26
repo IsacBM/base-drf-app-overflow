@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 
-from AppCore.basics.models.models import BasicModel, Base404ExceptionManager, Base404ExceptionUserManager 
+from AppCore.basics.models.models import BasicModel, Base404ExceptionManager, Base404ExceptionUserManager # A IA pediu para utilizar essa outra classe de manager
 from AppCore.core.helpers.helpers_mixin import ModelHelperMixin
 
 from .helpers import UserHelpers
