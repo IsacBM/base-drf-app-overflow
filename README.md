@@ -20,35 +20,71 @@ Fornecer uma base sólida, profissional e escalável para desenvolvimento de API
 - ⚡ **Produção Ready**: Configurações para desenvolvimento e produção
 - 🎨 **Clean Code**: Segue PEP8 e boas práticas Django/DRF
 
-## 🏗️ Estrutura do Projeto
+## 🏗️ Estrutura do Projeto:
 
 ```
-base-drf-app/
+base-drf-app-overflow/
 │
 ├── AppCore/                    # Módulo principal
 │   ├── core/                   # Camadas de arquitetura base
-│   │   ├── business.py         # Lógica de negócios
-│   │   ├── rules.py            # Regras de validação
-│   │   ├── helpers.py          # Queries e utilitários
-│   │   ├── state.py            # Máquina de estados
-│   │   └── mixins.py           # Integração com models
-│   ├── common/                 # Funcionalidades comuns
-│   ├── util/                   # Utilitários gerais
-│   └── basics/                 # Models e componentes base
+│   │   ├── business/           # Lógica de negócios
+│   │   │   ├── business.py
+│   │   │   └── business_mixin.py
+│   │   ├── rules/                # Regras de validação
+│   │   │   ├── rules.py
+│   │   │   └── rules_mixin.py
+│   │   ├── helpers/              # Queries e utilitários
+│   │   │   ├── helpers.py
+│   │   │   └── helpers_mixin.py
+│   │   ├── state/                # Máquina de estados
+│   │   │   ├── state.py
+│   │   │   └── state_mixin.py
+│   │   ├── exceptions/           # Exceções customizadas
+│   │   └── permissions/        # Permissões customizadas
+│   │
+│   ├── common/                 # Funcionalidades comuns (textos, utils)
+│   └── basics/                 # Models e componentes base (mixins, views)
 │
-├── users/                      # App exemplo completo
-│   ├── models.py
-│   ├── business.py
-│   ├── rules.py
-│   ├── helpers.py
-│   └── admin.py
+├── Users/                      # Módulo de Usuários
+│   ├── users/                  # App de perfil e dados do usuário
+│   │   ├── models.py
+│   │   ├── business.py
+│   │   ├── rules.py
+│   │   ├── helpers.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   └── admin.py
+│   │
+│   ├── account/                # App de gerenciamento de conta (email, códigos)
+│   │   ├── models.py
+│   │   ├── business.py
+│   │   ├── rules.py
+│   │   ├── helpers.py
+│   │   ├── serializers.py
+│   │   └── views.py
+│   │
+│   └── urls.py                 # Rotas principais do módulo Users
 │
-├── auth/                       # Autenticação
+├── Auth/                       # Módulo de Autenticação
+│   ├── auth/                   # App de autenticação (JWT)
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   └── urls.py
+│   │
+│   └── urls.py                 # Rotas principais do módulo Auth
+│
 ├── BaseDRFApp/                 # Configurações Django
-├── ARCHITECTURE.md             # Documentação da arquitetura
-├── EXAMPLES.py                 # Exemplos de uso
-├── IMPROVEMENTS.md             # Sugestões de melhorias
-└── create_app.py               # Script para criar novos apps
+│   ├── settings.py
+│   ├── urls.py
+│   ├── rest_framework_settings.py
+│   └── spectacular_settings.py
+│
+├── static/                     # Arquivos estáticos (admin, drf, etc.)
+├── .gitignore
+├── manage.py
+├── README.md
+├── requirements.txt
+└── config_minha.md             # (Seu arquivo de configuração/docs)
 ```
 
 ## 🚀 Quick Start
