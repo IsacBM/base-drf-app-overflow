@@ -1,5 +1,5 @@
 from AppCore.core.business.business import ModelInstanceBusiness
-from .rules import UserRule
+
 
 class UserBusiness(ModelInstanceBusiness):
     
@@ -23,22 +23,3 @@ class UserBusiness(ModelInstanceBusiness):
     def get_active_profiles(self):
         """Retorna apenas os perfis ativos do usuário"""
         return self.object_instance.profiles.filter(status=1)
-
-    # Mudar a senha
-    def change_password(self, old_password, new_password):
-        """
-        Orquestra a mudança de senha do usuário (self.object_instance).
-        """
-        try:
-            # 1. Validação (Camada de Rules)
-            rule = UserRule(object_instance=self.object_instance)
-            rule.check_old_password(old_password)
-            
-            # 2. Execução (Lógica de Negócio)
-            user = self.object_instance
-            user.set_password(new_password) # Define a nova senha (criptografada)
-            user.save() # Salva o usuário no banco
-            
-        except self.exceptions_handled as e:
-            raise e
-        

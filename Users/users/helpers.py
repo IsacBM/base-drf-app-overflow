@@ -1,5 +1,7 @@
 from django.utils import timezone
+
 from AppCore.core.helpers.helpers import ModelInstanceHelpers
+
 
 class UserHelpers(ModelInstanceHelpers):
     

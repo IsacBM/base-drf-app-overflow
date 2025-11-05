@@ -2,14 +2,14 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 
-from AppCore.basics.models.models import BasicModel, Base404ExceptionManager, Base404ExceptionUserManager # A IA pediu para utilizar essa outra classe de manager
+from AppCore.basics.models.models import BasicModel, Base404ExceptionManager
 from AppCore.core.helpers.helpers_mixin import ModelHelperMixin
 
 from .helpers import UserHelpers
 from . import choices
 
 
-class UserManager(Base404ExceptionUserManager):
+class UserManager(Base404ExceptionManager):
     def create_user(self, email, name, password=None, phone=None, birth_date=None, profiles=None, **extra_fields):
         if not email:
             raise ValueError('O usuário deve ter um email')
@@ -57,14 +57,6 @@ class UserManager(Base404ExceptionUserManager):
             **extra_fields
         )
     
-    def get_by_natural_key(self, username):
-        """
-        Substitui o método padrão para usar o get() do queryset diretamente.
-        Isso evita que o get() customizado do manager (que lança NotFoundException)
-        seja chamado e quebre o comando createsuperuser.
-        """
-        return self.get_queryset().get(**{self.model.USERNAME_FIELD: username})
-    
 
 class User(AbstractBaseUser, PermissionsMixin, BasicModel, ModelHelperMixin):
     name = models.CharField(
@@ -111,7 +103,6 @@ class User(AbstractBaseUser, PermissionsMixin, BasicModel, ModelHelperMixin):
 
     objects = UserManager()
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ['name'] # Adicionado para teste de super usuário
     helper_class = UserHelpers
     
     class Meta:
