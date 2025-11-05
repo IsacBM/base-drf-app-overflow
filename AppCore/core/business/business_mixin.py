@@ -5,7 +5,7 @@ class ModelBusinessMixin:
     @property
     def business(self):
         if not self._business:
-            self._business = self.get_model_business_class(self)
+            self._business = self.get_model_business_class()
 
         return self._business
     

@@ -4,12 +4,14 @@ from django.utils import timezone
 
 from AppCore.basics.models.models import BasicModel, Base404ExceptionManager
 from AppCore.core.helpers.helpers_mixin import ModelHelperMixin
+from AppCore.core.business.business_mixin import ModelBusinessMixin
 
+from .business import UserBusiness
 from .helpers import UserHelpers
 from . import choices
 
 
-class UserManager(Base404ExceptionManager):
+class UserManager(BaseUserManager):
     def create_user(self, email, name, password=None, phone=None, birth_date=None, profiles=None, **extra_fields):
         if not email:
             raise ValueError('O usuário deve ter um email')
@@ -58,7 +60,9 @@ class UserManager(Base404ExceptionManager):
         )
     
 
-class User(AbstractBaseUser, PermissionsMixin, BasicModel, ModelHelperMixin):
+class User(
+    ModelHelperMixin, ModelBusinessMixin, AbstractBaseUser, PermissionsMixin, BasicModel
+):
     name = models.CharField(
         'Nome',
         max_length=150,
@@ -103,17 +107,31 @@ class User(AbstractBaseUser, PermissionsMixin, BasicModel, ModelHelperMixin):
 
     objects = UserManager()
     USERNAME_FIELD = "email"
+    
     helper_class = UserHelpers
+    business_class = UserBusiness
     
     class Meta:
         db_table = 'users'
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'
         ordering = ['-date_joined']
-    
+
     def __str__(self):
         return self.name
-    
+
+    @property
+    def account_business(self):
+        from Users.account.business import AccountBusiness
+
+        return AccountBusiness(object_instance=self)
+
+    @property
+    def account_helper(self):
+        from Users.account.helpers import AccountHelper
+
+        return AccountHelper(object_instance=self)
+
 
 class PasswordResetCode(BasicModel):
     user = models.OneToOneField(

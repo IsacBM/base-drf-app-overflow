@@ -3,7 +3,7 @@ import random, string
 from AppCore.core.business.business import ModelInstanceBusiness
 from AppCore.core.exceptions.exceptions import SystemErrorException
 from AppCore.common.util.util import send_simple_email
-from AppCore.common.texts.emails import EMAIL_CREATE_ACCOUNT
+from AppCore.common.texts.emails import EMAIL_CREATE_ACCOUNT, EMAIL_PASSWORD_RESET_ACCOUNT
 
 from BaseDRFApp import settings
 from Users.users.models import User
@@ -12,7 +12,11 @@ from .rules import AccountRule
 from .helpers import AccountHelper
 
 
-class AccountBusiness(ModelInstanceBusiness):   
+class AccountBusiness(ModelInstanceBusiness):
+    @property
+    def user(self):
+        return self.object_instance
+    
     def _get_code(self):
         try:
             length_code = 6
@@ -20,8 +24,7 @@ class AccountBusiness(ModelInstanceBusiness):
             return ''.join(random.choices(string.ascii_lowercase, k=length_code))
         except Exception as e:
             raise e
-        
-    
+
     def get_code(self, email, type_profile):
         try:
             account_rules = AccountRule()
@@ -57,7 +60,10 @@ class AccountBusiness(ModelInstanceBusiness):
         except Exception as e:
             raise SystemErrorException('Não foi possível enviar o email de verificação.')
         
-    def validate_code(self, email, code):
+    def validate_code(self, code, email=None):
+        if not email:
+            email = self.user.email
+
         try:
             email_account_code = EmailAccountCode.objects.get(
                 email=email, code=code
@@ -91,3 +97,27 @@ class AccountBusiness(ModelInstanceBusiness):
             raise e
         except Exception as e:
             raise SystemErrorException('Não foi possível criar a conta do usuário.')
+    
+    def get_code_reset_password(self):
+        self.user.account_helper.del_codes_expired()
+
+        random_code = self._get_code()
+        
+        return EmailAccountCode.objects.create(
+            email=self.user.email,
+            code=random_code
+        )
+
+    def send_reset_password_email(self, email_account_code):
+        try:
+            send_simple_email(
+                "Redefinição de senha - Código de verificação",
+                f"Código de verificação: {email_account_code.code}",
+                settings.DEFAULT_FROM_EMAIL,
+                [self.user.email],
+                EMAIL_PASSWORD_RESET_ACCOUNT % email_account_code.code
+            )
+        except self.exceptions_handled as e:
+            raise e
+        except Exception as e:
+            raise SystemErrorException('Não foi possível enviar o email de verificação.')

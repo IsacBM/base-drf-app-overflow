@@ -6,7 +6,6 @@ from simple_history.models import HistoricalRecords
 from AppCore.core.exceptions.exceptions import NotFoundException
 
 
-
 class Base404ExceptionManager(Manager):
     def get(self, *args, **kwargs):
         try:

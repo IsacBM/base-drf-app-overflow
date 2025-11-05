@@ -5,7 +5,7 @@ class ModelStateMixin:
     @property
     def state(self):
         if not self._state:
-            self._state = self.get_model_state_class(self)
+            self._state = self.get_model_state_class()
 
         return self._state
 
@@ -13,7 +13,7 @@ class ModelStateMixin:
         if not self.state_class:
             raise ValueError('state_class não foi definido no model')
 
-        return self.dispatcher_state_class.get(self.status)(instance=self)
+        return self.dispatcher_state_class.get(self.status)(object_instance=self)
     
     def set_state(self, new_state):
         if not self.state:

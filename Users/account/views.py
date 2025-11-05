@@ -4,11 +4,15 @@ from drf_spectacular.utils import (
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 
+from AppCore.core.exceptions.exceptions import NotFoundException
 from AppCore.basics.views.basic_views import BasicPostAPIView
 from AppCore.basics.mixins.mixins import AllowAnyMixin
+from Users.users.models import User
 
 from .serializers import (
-    CreateAccountSerializer, CreateAccountConfirmCodeSerializer, PasswordConfirmCreateAccountSerializer
+    CreateAccountSerializer, CreateAccountConfirmCodeSerializer,
+    PasswordConfirmCreateAccountSerializer, ForgotPasswordRequestSerializer,
+    ForgotPasswordConfirmSerializer
 )
 from .business import AccountBusiness
 
@@ -40,7 +44,7 @@ class CreateAccountConfirmCodePostView(BasicPostAPIView, AllowAnyMixin):
         
         account_business = AccountBusiness()
         
-        account_business.validate_code(email, code)
+        account_business.validate_code(email=email, code=code)
 
         
 @extend_schema(tags=["Users.Create account"])
@@ -67,3 +71,21 @@ class ConfirmPasswordAccountPostView(BasicPostAPIView, AllowAnyMixin):
             'message': 'Usuário criado com sucesso.',
             'status_code': status.HTTP_201_CREATED
         }
+
+
+@extend_schema(tags=["Users.Password reset"])
+class RequestForgotPasswordCodePostView(AllowAnyMixin, BasicPostAPIView):
+    serializer_class = ForgotPasswordRequestSerializer
+    success_message = "Código de verificação enviado para o email informado."
+    
+    def do_action_post(self, serializer, request):
+        email = serializer.get('email')
+        
+        try:
+            user = User.objects.get(email=email)
+        except NotFoundException:
+            raise NotFoundException('Usuário com o email informado não encontrado.')
+        
+        code_reset = user.account_business.get_code_reset_password()
+
+        user.account_business.send_reset_password_email(code_reset)
