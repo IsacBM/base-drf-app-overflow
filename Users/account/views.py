@@ -12,7 +12,7 @@ from Users.users.models import User
 from .serializers import (
     CreateAccountSerializer, CreateAccountConfirmCodeSerializer,
     PasswordConfirmCreateAccountSerializer, ForgotPasswordRequestSerializer,
-    ForgotPasswordConfirmSerializer
+    ForgotPasswordConfirmSerializer, ForgotPasswordVerifyCodeSerializer
 )
 from .business import AccountBusiness
 
@@ -89,3 +89,46 @@ class RequestForgotPasswordCodePostView(AllowAnyMixin, BasicPostAPIView):
         code_reset = user.account_business.get_code_reset_password()
 
         user.account_business.send_reset_password_email(code_reset)
+
+@extend_schema(tags=["Users.Password reset"])
+class ForgotPasswordVerifyCodePostView(AllowAnyMixin, BasicPostAPIView):
+    """
+    Validar o código de reset.
+    """
+    serializer_class = ForgotPasswordVerifyCodeSerializer
+    success_message = "Código verificado. Você pode prosseguir com a alteração da senha."
+    
+    def do_action_post(self, serializer, request):
+        email = serializer.get('email')
+        code = serializer.get('code')
+        
+        account_business = AccountBusiness()
+        account_business.validate_code(email=email, code=code)
+
+
+@extend_schema(tags=["Users.Password reset"])
+class ForgotPasswordConfirmPostView(AllowAnyMixin, BasicPostAPIView):
+    """
+    Definir a nova senha.
+    """
+    serializer_class = ForgotPasswordConfirmSerializer
+    success_message = "Senha redefinida com sucesso."
+    
+    def do_action_post(self, serializer, request):
+        email = serializer.get('email')
+        code = serializer.get('code')
+        new_password = serializer.get('new_password')
+        
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+             raise NotFoundException('Usuário com o email informado não encontrado.')
+        
+        user.account_business.confirm_forgot_password(
+            code=code,
+            new_password=new_password
+        )
+        return {
+            'message': 'Senha redefinida com sucesso.',
+            'status_code': status.HTTP_200_OK
+        }

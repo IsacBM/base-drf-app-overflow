@@ -1,7 +1,7 @@
 import random, string
 
 from AppCore.core.business.business import ModelInstanceBusiness
-from AppCore.core.exceptions.exceptions import SystemErrorException
+from AppCore.core.exceptions.exceptions import SystemErrorException, ValidationException
 from AppCore.common.util.util import send_simple_email
 from AppCore.common.texts.emails import EMAIL_CREATE_ACCOUNT, EMAIL_PASSWORD_RESET_ACCOUNT
 
@@ -121,3 +121,28 @@ class AccountBusiness(ModelInstanceBusiness):
             raise e
         except Exception as e:
             raise SystemErrorException('Não foi possível enviar o email de verificação.')
+    
+    def confirm_forgot_password(self, code, new_password):
+        """
+        Define a nova senha, se o código já foi validado
+        """
+        try:
+            email_account_code = EmailAccountCode.objects.get(
+                email=self.user.email,
+                code=code
+            )
+
+            if not email_account_code.is_validated:
+                raise ValidationException("O código não foi verificado. Por favor, valide o código primeiro.")
+
+            self.user.set_password(new_password)
+            self.user.save()
+
+            email_account_code.delete()
+
+        except EmailAccountCode.DoesNotExist:
+            raise ValidationException('O código informado é inválido.')
+        except self.exceptions_handled as e:
+            raise e
+        except Exception as e:
+            raise SystemErrorException('Não foi possível redefinir a senha.')

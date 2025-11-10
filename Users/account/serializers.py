@@ -154,3 +154,18 @@ class ForgotPasswordConfirmSerializer(serializers.Serializer):
             raise serializers.ValidationError("As senhas não conferem.")
 
         return data
+    
+class ForgotPasswordVerifyCodeSerializer(serializers.Serializer):
+    """
+    Apenas verificar o código.
+    """
+    email = serializers.EmailField(write_only=True)
+    code = serializers.CharField(write_only=True)
+
+    def validate_code(self, value):
+        if len(value) != 6:
+            raise serializers.ValidationError(
+                "O código deve possuir 6 dígitos."
+            )
+        return value
+    
